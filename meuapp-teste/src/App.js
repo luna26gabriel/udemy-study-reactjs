@@ -1,21 +1,12 @@
-import React, { Component } from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import './style.css';
 
-class App extends Component {
-
-  constructor(props){
-    super(props);
-    this.state = {
-
-    }
-  }
-
-  render() {
-    return (
-      <div>
-       Aoba
-      </div>
-    )
-  }
+function App() {
+  return(
+    <div>
+      
+    </div>
+  )  
 }
 
 export default App

@@ -1,0 +1,21 @@
+body {
+    background-color: #c1c1c1
+}
+.container {
+    width: 100%;
+    align-items: center;
+    flex-direction: column;
+    display: flex;
+}
+.btn-biscoito {
+    border: 5px solid #f1f1f1;
+    border-radius: 4px;
+    width: 150px;
+    height: 40px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+.texto-frase {
+    font-style: italic;
+    color: #bb7b22;
+}

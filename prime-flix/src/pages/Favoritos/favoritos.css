@@ -1,0 +1,25 @@
+div.favoritos {
+    margin-top: 50px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+div.favoritos > div {
+    margin-top: 50px;
+    width: 500px;
+    min-height: 400px;
+    /* border: 1px solid; */
+}
+div.favoritos .lista-favoritos {
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;    
+}
+div.favoritos .lista-favoritos div.item-lista {
+    border-bottom: 1px solid #777;
+    display: flex;
+    justify-content: space-between;
+}

@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { db } from "./firebaseConection";
-import { doc, setDoc, collection, addDoc, getDoc, getDocs} from 'firebase/firestore';
+import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc} from 'firebase/firestore';
 import './style.css'
 function App() {
 
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
+  const [idPost, setIdPost] = useState('');
 
   const [posts, setPosts] = useState([]);
+
+  function clearAll() {
+    setAutor('')
+    setTitulo('')
+    setIdPost('')
+    console.log('Limpo!');
+  }
 
   async function handleAdd() {
     // await setDoc(doc(db, "posts", "24"), {
@@ -25,8 +33,7 @@ function App() {
       autor: autor
     })
     .then(()=>{
-      setAutor('')
-      setTitulo('')
+      clearAll()
       console.log('Deu bom')
     })
     .catch((er)=>{
@@ -72,10 +79,41 @@ function App() {
     })
   }
 
+  async function editarPost() {
+    const docRef = doc(db, 'posts', idPost);
+    await updateDoc(docRef, {
+      titulo: titulo,
+      autor: autor
+    })
+    .then(() => {
+      clearAll()
+    })
+    .catch((er)=> {
+      console.log(er);
+    })
+  }
+
+  async function excluirPost(idPost) {
+    // alert(idPost);
+    const docRef = doc(db, 'posts', idPost);
+    await deleteDoc(docRef)
+    .then((response)=> {
+      alert('Post Deletado com Sucesso');
+      buscarAllPost()
+    })
+    .catch((er)=>{
+      console.log(er);
+    })
+  }
+
   return (
     <div className="App">
       <h1>ReactJS + Firebase :) </h1>
       <div className="container">
+        <label htmlFor="">ID do Post:</label>
+        <input type="text" placeholder="Id do Post" value={idPost} onChange={(e)=>{setIdPost(e.target.value)}}
+        />
+
         <label>Titulo: </label>
         <textarea  placeholder="Digite o Titulo" type="text" value={titulo} onChange={(e)=>{setTitulo(e.target.value)}}
         ></textarea>
@@ -85,13 +123,17 @@ function App() {
         />
 
         <button onClick={handleAdd}>Cadastrar</button>
-        <button onClick={buscarPost}>Buscar 1 Item</button>
+        <button onClick={editarPost}>Atualizar Post</button>
         <button onClick={buscarAllPost}>Buscar Todos Item</button>
 
         <ul>
            { posts.map((post) => {
               return (
-                <li key={post.id}>Titulo: {post.titulo} | Autor: {post.autor}</li>
+                <li key={post.id}>
+                  <strong>ID: {post.id}</strong><br />Titulo: {post.titulo} | Autor: {post.autor}
+                  <br/><button onClick={()=> excluirPost(post.id)}>Excluir</button>
+                </li>
+                
               )
             })
           }

@@ -2,6 +2,9 @@ meuapp/node_modules
 meuapp-teste/node_modules
 prime-flix/node_modules
 fireapp/node_modules
+fireapp-login/node_modules
 
 # Local Netlify folder
 .netlify
+fireapp/src/firebaseConection.js
+fireapp-login/src/firebaseConection.js

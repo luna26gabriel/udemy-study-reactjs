@@ -1,14 +1,70 @@
-import { useState } from "react";
-import { db } from "./firebaseConection";
-import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc} from 'firebase/firestore';
-import './style.css'
+import { useState, useEffect } from "react";
+import { db, auth } from "./firebaseConection";
+import { doc, 
+        setDoc, 
+        collection, 
+        addDoc, 
+        getDoc, 
+        getDocs, 
+        updateDoc, 
+        deleteDoc,
+        onSnapshot} from 'firebase/firestore';
+import { createUserWithEmailAndPassword,
+         signInWithEmailAndPassword,
+         signOut,
+         onAuthStateChanged
+ } from 'firebase/auth';     
+import './style.css';
+
 function App() {
 
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
   const [idPost, setIdPost] = useState('');
 
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+
+  const [user, setUser] = useState(false);
+  const [userDetail, setUserDetail] = useState({})
+
   const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    async function loadPosts() {
+      const unsub = onSnapshot(collection(db, 'posts'), (onSnapshot)=> {
+        var listaPosts = [];
+        onSnapshot.forEach((doc) => {       
+          listaPosts.push({
+            id: doc.id,
+            titulo: doc.data().titulo,
+            autor: doc.data().autor
+          })       
+        })
+        setPosts(listaPosts);
+      })
+    }
+    loadPosts();
+  }, []);
+
+  useEffect(()=>{
+    async function checkLogin() {
+      onAuthStateChanged(auth, (user)=>{
+        if(user) {
+          console.log(user);
+          setUserDetail({
+            uid: user.uid,
+            email: user.email
+          })
+          setUser(true);          
+        } else {
+          setUser(false);
+          setUserDetail({});
+        }
+      })
+    }
+    checkLogin();
+  }, [])
 
   function clearAll() {
     setAutor('')
@@ -99,17 +155,93 @@ function App() {
     await deleteDoc(docRef)
     .then((response)=> {
       alert('Post Deletado com Sucesso');
-      buscarAllPost()
+      // buscarAllPost();
+    })
+    .catch((er)=>{      
+      console.log(er);
+    })
+  }
+
+  async function novoUsuario() {
+    // alert('teste');
+    await createUserWithEmailAndPassword(auth, email, senha)
+    .then((value)=>{
+      console.log("Cadastrado com Sucesso");
+      setEmail('');
+      setSenha('');
+      console.log(value);
+    })
+    .catch((er)=>{
+      if (er.code === 'auth/email-already-in-use') {
+        alert('Email já registrado')
+      } else if(er.code === 'auth/weak-password'){
+        alert('Senha Fraca, digite pelo menos 6 Caracteres')
+      }
+      console.log(er);
+    })
+  }
+
+  async function loginUsuario() {
+    // alert('Teste')
+    await signInWithEmailAndPassword(auth, email, senha)
+    .then((value)=>{
+      console.log('user logando com sucesso');
+      setUserDetail({
+        uid: value.user.uid,
+        email: value.user.email
+      })
+      setUser(true);
+      setEmail('');
+      setSenha('');
+      console.log(value.user);
     })
     .catch((er)=>{
       console.log(er);
     })
   }
 
+  async function deslogar() {
+    await signOut(auth)
+    .then(()=>{
+      setUser(false);
+      setUserDetail({})
+    })
+    .catch((er)=>{
+      console.log(er);
+    })    
+  }
+
   return (
     <div className="App">
       <h1>ReactJS + Firebase :) </h1>
+
+      {user && (
+        <div>
+          <strong>Seja bem-vindo(a) (tu ta logado)</strong><br />
+          <span>Sua UId: <strong>{userDetail.uid}</strong> | Seu Email: <strong>{userDetail.email}</strong></span><br />
+          <button onClick={deslogar}>Sair</button>
+        </div>
+      )}
       <div className="container">
+        <h2>Usuários</h2>
+        <label htmlFor="">Email</label>
+        <input 
+          value={email}
+          onChange={(e)=>{setEmail(e.target.value)}}
+          placeholder="Digite seu Email"/>
+        <label htmlFor="">Senha</label>
+        <input 
+          type="password"
+          value={senha}
+          onChange={(e)=>{setSenha(e.target.value)}}
+          placeholder="Digite seu Senha"/>
+
+        <button onClick={novoUsuario}>Cadastrar</button>
+        <button onClick={loginUsuario}>Login</button>
+      </div>
+
+      <div className="container">
+        <h2>Posts</h2>
         <label htmlFor="">ID do Post:</label>
         <input type="text" placeholder="Id do Post" value={idPost} onChange={(e)=>{setIdPost(e.target.value)}}
         />

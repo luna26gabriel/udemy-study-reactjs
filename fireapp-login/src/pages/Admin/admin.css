@@ -1,0 +1,67 @@
+.admin-container {
+    padding: 50px;
+}
+.admin-container form {
+    display: flex;
+    width: 500px;
+    justify-content: center;
+    align-items: end;
+    flex-direction: column;
+    margin: 0 auto;
+    gap: 10px;
+}
+.admin-container form textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 10px;
+}
+.admin-container form button {
+    padding: 15px 40px;
+    background-color: rgb(120, 27, 170);
+    color: #fff;
+}
+.admin-container form button.btn-edit {
+    background-color: orange;
+    color: #000;
+}
+hr{
+    margin: 15px 0;
+}
+button {
+    padding: 5px 20px;
+    border: none;
+    border-radius: 5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.admin-container article {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #d1d1d1;
+}
+.admin-container article div {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+.admin-container article div .btn-edit {
+    background-color: rgb(23, 81, 125);
+    color: #fff;
+
+}
+.admin-container article div .btn-delete {
+    background-color: rgb(53, 120, 53);
+    color: #fff;
+}
+.admin-container .btn-logout {
+    background-color: rgb(138, 0, 0);
+    color: #fff;
+    float: inline-end;
+    margin-top: 20px;
+}

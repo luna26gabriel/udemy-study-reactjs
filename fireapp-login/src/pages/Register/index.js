@@ -52,7 +52,7 @@ export default function Register() {
             </form>
 
             <Link to="/" className='register'>
-                J[a] possuí conta? Cadastre-se
+                Já possuí conta? Cadastre-se
             </Link>
         </div>
     )

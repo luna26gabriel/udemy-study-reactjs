@@ -3,6 +3,7 @@ meuapp-teste/node_modules
 prime-flix/node_modules
 fireapp/node_modules
 fireapp-login/node_modules
+contextapi/node_modules
 
 # Local Netlify folder
 .netlify

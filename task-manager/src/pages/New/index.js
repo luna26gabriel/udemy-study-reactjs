@@ -6,10 +6,11 @@ import Title from '../../components/Title'
 
 import { AuthContext } from '../../contexts/auth'
 import { db } from '../../services/firebaseConnections'
-import { collection, getDocs, getDoc, doc, addDoc } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, addDoc, updateDoc } from 'firebase/firestore'
 import { toast } from 'react-toastify'
 
 import './new.css'
+import { useNavigate, useParams } from 'react-router-dom'
 
 
 const listRef = collection(db, 'customers')
@@ -17,6 +18,8 @@ const listRef = collection(db, 'customers')
 export default function New() {
 
     const { user } = useContext(AuthContext)
+    const { id } = useParams();
+    const navegate = useNavigate();
 
     const [customers, setCustomers] = useState([])
     const [loadCustomer, setLoadCustomer] = useState(true)
@@ -25,6 +28,8 @@ export default function New() {
     const [complemento, setComplemento] = useState('');
     const [assunto, setAssunto] = useState('Suporte');
     const [status, setStatus] = useState('Aberto');
+
+    const [idCustomer, setIdCustomer] = useState(false);
 
     useEffect(() => {
         async function loadCustomer(params) {
@@ -46,6 +51,10 @@ export default function New() {
                 }
                 setCustomers(lista)
                 setLoadCustomer(false);
+
+                if (id) {
+                    loadId(lista);
+                }
             }
             catch (er) {
                 console.log(er);
@@ -55,6 +64,23 @@ export default function New() {
         }
         loadCustomer();
     }, [])
+
+    async function loadId(lista) {
+        try {
+            const docRef = doc(db, 'tasks', id);
+            const taskData = await getDoc(docRef);
+            setAssunto(taskData.data().title);
+            setStatus(taskData.data().status);
+            setComplemento(taskData.data().complement);
+            let index = lista.findIndex(item => item.id == taskData.data().clientID)
+            setCustomerSelected(index);
+            setIdCustomer(true);
+        }
+        catch (er) {
+            console.log(er);
+            setIdCustomer(false);
+        }
+    }
 
     function handleOptionChange(e) {
         setStatus(e.target.value)
@@ -69,11 +95,36 @@ export default function New() {
         setCustomerSelected(e.target.value)
     }
 
-   async function handleRegister(e) {
+    async function handleRegister(e) {
         e.preventDefault();
 
-        // console.log(customers[customerSelected]);
-        // console.log(customerSelected);
+        //Caso tenha um ID é para Editar
+        if (idCustomer) {
+            try {
+                const docRef = doc(db, 'tasks', id)
+                await updateDoc(docRef, {
+                    modified: new Date(),
+                    clientNome: customers[customerSelected].nameFantasia,
+                    clientID: customers[customerSelected].id,
+                    title: assunto,
+                    status: status,
+                    complement: complemento,
+                    userId: user.uid
+                });
+                toast.success('Chamada Alterada com Sucesso')
+                setCustomerSelected(0)
+                setAssunto('Suporte')
+                setStatus('Aberto')
+                setComplemento('')
+                navegate('/dashboard')
+            }
+            catch (er) {
+                toast.error('Algo deu errado, tente novamente');
+                console.log(er)
+            }
+            return;
+        }
+
         //Registar um novo Chamado
         try {
             await addDoc(collection(db, 'tasks'), {
@@ -82,7 +133,7 @@ export default function New() {
                 clientID: customers[customerSelected].id,
                 title: assunto,
                 status: status,
-                complement: complemento ,
+                complement: complemento,
                 userId: user.uid
             })
             setCustomerSelected(0)
@@ -90,7 +141,7 @@ export default function New() {
             setStatus('Aberto')
             setComplemento('');
             toast.success('Chamada Registrada com Sucesso')
-        } 
+        }
         catch (er) {
             toast.error('Algo deu errado, tente novamente');
             console.log(er)
@@ -101,7 +152,7 @@ export default function New() {
         <div>
             <Header />
             <div className="container">
-                <Title name='Novo Chamado' >
+                <Title name={id ? 'Editando Chamado' : 'Novo Chamado'} >
                     <FiPlusCircle color='#000' size={25} />
                 </Title>
 

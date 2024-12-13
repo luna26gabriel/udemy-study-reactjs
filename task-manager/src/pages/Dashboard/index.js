@@ -1,4 +1,4 @@
-import { FiDelete, FiEdit, FiList, FiPlus } from "react-icons/fi";
+import { FiDelete, FiEdit, FiEdit2, FiList, FiPlus, FiSearch } from "react-icons/fi";
 import Header from "../../components/Header";
 import Title from "../../components/Title";
 
@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { collection, doc, getDocs, limit, orderBy, query, startAfter } from "firebase/firestore";
 import { db } from "../../services/firebaseConnections";
 
+import Modal from "../../components/Modal";
+
 const listRef = collection(db, 'tasks')
 
 export default function Dashboard() {
@@ -21,6 +23,9 @@ export default function Dashboard() {
 
     const [lastDocs, setLastDocs] = useState()
     const [loadMode, setLoadMore] = useState()
+
+    const [showModal, setShowModal] = useState(false)
+    const [detail, setDetail] = useState({})
 
     useEffect(() => {
         async function loadTasks() {
@@ -53,6 +58,7 @@ export default function Dashboard() {
                     assunt: doc.data().title,
                     status: doc.data().status,
                     created: doc.data().created,
+                    complemento: doc.data().complement,
                     createdFormat: format(doc.data().created.toDate(), "dd/MM/yyyy HH:mm:ss")
                 })
             })
@@ -72,6 +78,12 @@ export default function Dashboard() {
         const queryMore = await getDocs(q)
         await updateState(queryMore)
         console.log(isEmptyTask)
+    }
+
+    function handleModal(item) {
+        setShowModal(true)
+        setDetail(item)
+        // console.log(item);
     }
 
     return (
@@ -126,8 +138,8 @@ export default function Dashboard() {
                                                         </td>
                                                         <td data-label="Cadastrado">{item.createdFormat}</td>
                                                         <td data-label="#">
-                                                            <button className="action-btn" style={{ backgroundColor: '#3583f6' }}><FiEdit color="#fff" size={25} /></button>
-                                                            <button className="action-btn" style={{ backgroundColor: '#f6a935' }}><FiDelete color="#fff" size={25} /></button>
+                                                            <button onClick={() => {handleModal(item)}} className="action-btn" style={{ backgroundColor: '#3583f6' }}><FiSearch color="#fff" size={25} /></button>
+                                                            <Link to={`/new/${item.taskId}`} className="action-btn" style={{ backgroundColor: '#f6a935' }}><FiEdit2 color="#fff" size={25} /></Link>
                                                         </td>
                                                     </tr>
                                                 )
@@ -143,6 +155,13 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+
+            {showModal && (
+                <Modal 
+                    conteudo={detail}
+                    close={()=> {setShowModal(!showModal)}}
+                />  
+            )}
         </div>
     )
 }

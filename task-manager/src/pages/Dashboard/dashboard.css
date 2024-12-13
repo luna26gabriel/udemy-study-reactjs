@@ -36,7 +36,21 @@
     align-items: center;
     flex-direction: column;
 }
-
+.btn-more {
+    padding: 5px;
+    width: 150px;
+    border: 0;
+    background-color: #666;
+    color: #fff;
+    border-radius: 5px;
+    margin-top: 10px;
+    transition: 200ms ease-in;
+    font-size: 1.2em;
+}
+.btn-more:hover {
+    background-color: #ccc;
+    color: #000;
+}
 table {
     border: 1px solid #ccc;
     margin: 0;

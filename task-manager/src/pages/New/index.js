@@ -7,8 +7,10 @@ import Title from '../../components/Title'
 import { AuthContext } from '../../contexts/auth'
 import { db } from '../../services/firebaseConnections'
 import { collection, getDocs, getDoc, doc, addDoc } from 'firebase/firestore'
+import { toast } from 'react-toastify'
 
 import './new.css'
+
 
 const listRef = collection(db, 'customers')
 
@@ -70,12 +72,30 @@ export default function New() {
    async function handleRegister(e) {
         e.preventDefault();
 
-        await addDoc(collection(db, 'tasks'), {
-            client: customerSelected,
-            title: assunto,
-            status: status,
-            complement: complemento 
-        })
+        // console.log(customers[customerSelected]);
+        // console.log(customerSelected);
+        //Registar um novo Chamado
+        try {
+            await addDoc(collection(db, 'tasks'), {
+                created: new Date(),
+                clientNome: customers[customerSelected].nameFantasia,
+                clientID: customers[customerSelected].id,
+                title: assunto,
+                status: status,
+                complement: complemento ,
+                userId: user.uid
+            })
+            setCustomerSelected(0)
+            setAssunto('')
+            setStatus('Aberto')
+            setComplemento('');
+            toast.success('Chamada Registrada com Sucesso')
+        } 
+        catch (er) {
+            toast.error('Algo deu errado, tente novamente');
+            console.log(er)
+        }
+
     }
     return (
         <div>

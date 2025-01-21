@@ -1,0 +1,15 @@
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body{
+  background-color: #121212;
+  color: #FFF;
+  font-family: sans-serif;
+}
+.errors {
+  color: red;
+  align-self: baseline;
+}

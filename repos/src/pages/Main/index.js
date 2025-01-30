@@ -1,32 +1,73 @@
-import { useState, useCallback } from "react"
-import { Container, Form, SubmitButton } from "./style.js"
-import { FaGithub, FaPlus } from 'react-icons/fa';
+import { useState, useCallback, useEffect } from "react"
+import { Container, Form, SubmitButton, List, DeleteButton } from "./style.js"
+import { FaBars, FaGithub, FaPlus, FaSpinner, FaTrash } from 'react-icons/fa';
+import { Link } from 'react-router-dom' 
 
 import api from '../../services/api'
 
 export default function Main() {
 
     const [newRepo, setNewRepo] = useState('');
-    const [repositorios, setRepositorios] = useState([])
+    const [repositorios, setRepositorios] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState(null);
+
+    // Buscar
+    useEffect(()=>{
+        const repoStorage = localStorage.getItem('repos');
+
+        if(repositorios) {
+            setRepositorios(JSON.parse(repoStorage))
+        }
+    },[])
+
+    // Salvar Alterações
+    useEffect(()=>{
+        localStorage.setItem('repos', JSON.stringify(repositorios));
+    },[repositorios])
 
     const handleSubmit = useCallback((e)=>{
         e.preventDefault();
+        setLoading(true);
+        setAlert(null);
         async function submit() {
             try {
-                const response = await api.get(`repos/${newRepo}`)
+                if(newRepo === '') {
+                    throw new Error('Repositorio está incorreto')
+                }
+                const hasRepo = repositorios.find(repo => repo.name === newRepo);
+                console.log(hasRepo)
+                if(hasRepo !== undefined) {
+                    throw new Error('Repositorio Duplicado')
+                }
+                const response = await api.get(`repos/${newRepo}`);
                 console.log(response.data)
                 const data = {
-                    name: response.data.forks_url,
+                    name: response.data.full_name,
+                    link: response.data.git_url
                 }
                 setRepositorios([...repositorios, data])
                 setNewRepo('');
             }
-            catch (er) {
-                console.log(er)
-            } 
+            catch (er) {       
+                setAlert(true)
+                console.log(er);                
+            } finally {
+                setLoading(false);
+            }
         }
         submit();
     }, [newRepo, repositorios]);
+
+    function handleInput(e) {
+        setAlert(false);
+        setNewRepo(e.target.value);
+    }
+
+    const handleDelete = useCallback((name)=> {
+        const find = repositorios.filter(r=>r.name !== name)
+        setRepositorios(find);
+    }, [repositorios])
 
     return (
         <div>
@@ -37,17 +78,37 @@ export default function Main() {
                     Main
                 </h1>
 
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} error={alert}>
                     <input 
                         type="text"
                         placeholder="Adicionar Repositorios" 
                         value={newRepo} 
-                        onChange={(e)=>{setNewRepo(e.target.value)}}/>
+                        onChange={(e)=>{handleInput(e)}}/>
 
-                    <SubmitButton>
-                        <FaPlus color="#fff" size={14} />
+                    <SubmitButton loading={loading ? 1 : 0}>
+                        {loading ? (
+                                <FaSpinner color="#fff" size={14}/>
+                            ) : (
+                                <FaPlus color="#fff" size={14} />
+                            )}                        
                     </SubmitButton>
                 </Form>
+
+                <List>
+                    {repositorios.map(repo => (
+                        <li key={repo.name}>
+                            <span>
+                                <DeleteButton onClick={()=> handleDelete(repo.name)}>
+                                    <FaTrash size={14} color="#f00"/>
+                                </DeleteButton>
+                                {repo.name}
+                            </span>
+                            <Link to={`/repositorio/${encodeURIComponent(repo.name)}`}>
+                                <FaBars size={20}/>
+                            </Link>
+                        </li>
+                    ))}
+                </List>
 
             </Container>
         </div>

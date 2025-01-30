@@ -6,6 +6,7 @@ fireapp-login/node_modules
 contextapi/node_modules
 task-manager/node_modules
 performance/node_modules
+repos/node_modules
 
 # Local Netlify folder
 .netlify
